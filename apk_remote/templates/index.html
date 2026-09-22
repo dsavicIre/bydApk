@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f2f4ef">
+    <title>APK Relay</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span>
+          <span></span>
+        </div>
+        <div>
+          <p class="eyebrow">Android deployment</p>
+          <h1>APK Relay</h1>
+        </div>
+      </div>
+      <div class="header-status" id="header-status" data-state="disconnected">
+        <span class="status-light" aria-hidden="true"></span>
+        <span id="header-status-label">Disconnected</span>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="connection-strip" aria-labelledby="connection-title">
+        <div class="section-heading">
+          <p class="step-number">01</p>
+          <div>
+            <h2 id="connection-title">Remote device</h2>
+            <p id="connection-detail" class="section-detail" aria-live="polite">
+              No Android device is connected.
+            </p>
+          </div>
+        </div>
+
+        <div class="connection-controls">
+          <div class="connection-mode">
+            <div class="mode-header">
+              <h3 id="pairing-title">Wi-Fi pairing</h3>
+              <span id="pairing-status" class="mode-status" data-state="idle" aria-live="polite">
+                Ready
+              </span>
+            </div>
+            <form id="pairing-form" class="pairing-form" aria-labelledby="pairing-title">
+              <label class="field field-host">
+                <span>Pairing IP</span>
+                <input
+                  id="pair-host"
+                  name="pair-host"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="192.168.1.42"
+                  required
+                >
+              </label>
+              <label class="field field-port">
+                <span>Pairing port</span>
+                <input
+                  id="pair-port"
+                  name="pair-port"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  max="65535"
+                  placeholder="37125"
+                  required
+                >
+              </label>
+              <label class="field field-code">
+                <span>6-digit code</span>
+                <input
+                  id="pairing-code"
+                  name="pairing-code"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  pattern="[0-9]{6}"
+                  minlength="6"
+                  maxlength="6"
+                  placeholder="123456"
+                  required
+                >
+              </label>
+              <button id="pair-button" class="button button-secondary" type="submit">
+                Pair
+              </button>
+            </form>
+          </div>
+
+          <div class="connection-mode">
+            <div class="mode-header">
+              <h3 id="connect-title">Device connection</h3>
+            </div>
+            <form id="connection-form" class="connection-form" aria-labelledby="connect-title">
+              <label class="field field-host">
+                <span>IP address</span>
+                <input
+                  id="host"
+                  name="host"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="192.168.1.42"
+                  required
+                >
+              </label>
+              <label class="field field-port">
+                <span>Connection port</span>
+                <input
+                  id="port"
+                  name="port"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  max="65535"
+                  placeholder="42173"
+                  required
+                >
+              </label>
+              <div class="connection-actions">
+                <button id="connect-button" class="button button-primary" type="submit">
+                  Connect
+                </button>
+                <button id="disconnect-button" class="button button-secondary" type="button" disabled>
+                  Disconnect
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="install-workspace" aria-labelledby="package-title">
+          <div class="section-heading compact">
+            <p class="step-number">02</p>
+            <div>
+              <h2 id="package-title">Application package</h2>
+              <p class="section-detail">APK or XAPK</p>
+            </div>
+          </div>
+
+          <label class="drop-zone" id="drop-zone" for="package-input">
+            <input id="package-input" type="file" accept=".apk,.xapk" hidden>
+            <span class="file-glyph" id="file-glyph" aria-hidden="true">APK</span>
+            <span class="drop-title" id="file-name">Select a package</span>
+            <span class="drop-meta" id="file-meta">Drop file here or browse</span>
+            <span class="button button-file" aria-hidden="true">Choose file</span>
+          </label>
+
+          <div class="install-footer">
+            <div class="readiness" id="readiness">
+              <span class="readiness-line" aria-hidden="true"></span>
+              <span id="readiness-text">Connect a device to continue</span>
+            </div>
+            <button id="install-button" class="button button-install" type="button" disabled>
+              Install package
+            </button>
+          </div>
+        </section>
+
+        <section class="activity-workspace" aria-labelledby="activity-title">
+          <div class="activity-header">
+            <div class="section-heading compact">
+              <p class="step-number">03</p>
+              <div>
+                <h2 id="activity-title">Installation</h2>
+                <p class="section-detail" id="job-state">Ready</p>
+              </div>
+            </div>
+            <span class="job-badge" id="job-badge" data-state="idle">Idle</span>
+          </div>
+
+          <div class="progress-track" aria-hidden="true">
+            <span id="progress-bar"></span>
+          </div>
+
+          <div class="terminal" role="log" aria-live="polite" aria-atomic="true">
+            <div class="terminal-topline">
+              <span></span><span></span><span></span>
+              <p>ADB output</p>
+            </div>
+            <pre id="job-output">Awaiting package installation.</pre>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
